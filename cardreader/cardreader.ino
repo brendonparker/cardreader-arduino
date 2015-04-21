@@ -30,14 +30,16 @@ void loop()
 {
   milli = millis();
   if((milli - lastmilli) > 25){
-    if (count != 0)
+    if (count == 255)
     {
       Serial.println(count);
       printDataRead(data);
       printBadgeNumber(data);
-
-      count = 0;
+    } 
+    else {
+      //Serial.println('Read Error: Please Re-Scan');
     }
+    count = 0;
     lastmilli = milli;
   }
 }
@@ -76,8 +78,9 @@ void printBadgeNumber(byte data[]){
   // The position just before the F sentinel:
   int last = 16;
   // Store our re-grouped hex values here
-  byte sets[9] = {0,0,0,0,0,0,0,0,0};
-  
+  byte sets[9] = {
+    0,0,0,0,0,0,0,0,0  };
+
   //Remove parity bit at end
   sets[8] |= data[last] >> 1    & B00000011;
   sets[8] |= data[last-1] << 2  & B00001100;
@@ -90,21 +93,21 @@ void printBadgeNumber(byte data[]){
 
   sets[5] |= data[last-4] >> 1  & B00000011;
   sets[5] |= data[last-5] << 2  & B00001100;
-  
+
   sets[4] |= data[last-5] >> 2  & B00000001;
   sets[4] |= data[last-6] << 1  & B00001110;
-  
+
   sets[3] |= data[last-7]       & B00000111;
   sets[3] |= data[last-8] << 3  & B00001000;
 
   sets[2] |= data[last-8] >> 1  & B00000011;
   sets[2] |= data[last-9] << 2  & B00001100;
-  
+
   sets[1] |= data[last-9] >> 2  & B00000001;
   sets[1] |= data[last-10] << 1 & B00001110;
-  
+
   sets[0] |= data[last-11];
-  
+
   //Serial.print('ALL: ');
   for(int i = 0; i < 9; i++){
     Serial.print(sets[i], HEX);
@@ -112,6 +115,7 @@ void printBadgeNumber(byte data[]){
   Serial.println();
 
   //Serial.print('Badge Number: ');  
-  int badgenumber = sets[8] + 16 * sets[7] + 256 * sets[6] + 4096 * sets[5];
+  unsigned int badgenumber = sets[8] + 16 * sets[7] + 256 * sets[6] + 4096 * sets[5];
   Serial.println(badgenumber);
 }
+
